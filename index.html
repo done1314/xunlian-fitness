@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="循练">
+  <link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>循练 · 我的健身计划</title>
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#today" data-action="today" aria-label="循练首页"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M3 8l5-5m8 18 5-5M2 5l3-3m14 20 3-3M5 11l6-6m2 14 6-6"/></svg></span>循练</a><button class="avatar" aria-label="打开我的设置" data-action="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></button></header>
+  <main id="app"></main>
+  <nav class="bottom-nav" aria-label="主导航"><button id="nav-today" data-action="today"><span id="nav-icon-today"></span>今日训练</button><button id="nav-profile" data-action="profile"><span id="nav-icon-profile"></span>我的</button></nav>
+  <div id="toast" role="status"></div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <script src="schedule.js"></script><script src="plan-data.js"></script><script src="app.js"></script>
+</body></html>
