@@ -1,17 +1,12 @@
 # 循练 · 我的健身计划
 
-源码当前保持私有。当前 GitHub 套餐不支持私有仓库的 Pages，因此尚未上线。
+[打开训练计划](https://done1314.github.io/xunlian-fitness/)
 
-以后公开并发布：
+从 main 分支根目录通过 GitHub Pages 发布。推送后 GitHub 会自动更新网站。
 
-1. 仓库 Settings → General → Danger Zone → Change repository visibility，改为 Public。
-2. Settings → Pages → Build and deployment，选择 Deploy from a branch。
-3. Branch 选择 main，目录选择 / (root)，点击 Save。
-4. 等待 GitHub 完成发布，页面会显示可访问的网址。预期地址为 https://done1314.github.io/xunlian-fitness/ 。
+每天查看训练动作、组数、次数与动作图。底部“今日训练”和“我的”两个入口，支持浅色/深色外观。
 
-也可以保持仓库私有，并在支持私有仓库 Pages 的 GitHub 套餐下启用发布。
-
-每天查看训练动作、组数、次数与动作图。底部“今日训练”和“我的”两个入口，支持圆润的玻璃按钮与浅色/深色外观。
+界面参考 Apple 系统应用的标题、分组、列表和浮动导航。动作图使用整卡宽度，玻璃材质只用于浮动控件，文字和训练图保持清晰。玻璃边缘处理参考[这篇文章](https://juejin.cn/post/7514618352829448244)，视觉层级对照 [Apple 官方设计示例](https://www.apple.com/newsroom/2025/06/apple-introduces-a-delightful-and-elegant-new-software-design/)。
 
 - 默认推、拉、蹲排序，每轮后休息一天，可自行调整。
 - 设置训练开始日期、训练顺序、每周固定休息日。
