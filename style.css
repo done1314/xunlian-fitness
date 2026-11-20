@@ -81,11 +81,11 @@ main { max-width: 880px; margin: 0 auto; padding: calc(42px + env(safe-area-inse
 .exercise-heading p { font-size: 13px; color: var(--secondary); margin-top: 4px; }
 .detail-link { min-width: 44px; width: 44px; min-height: 44px; margin: -7px -10px 0 0; padding: 6px; color: var(--secondary); display: grid; place-items: center; border-radius: 50%; }
 .detail-link svg { width: 20px; height: 20px; stroke-width: 1.5; }
-.exercise-art { width: 100%; height: 152px; display: flex; justify-content: center; align-items: center; padding: 8px 12px; margin: 14px 0; border-radius: 17px; background: #fff; overflow: hidden; }
+.exercise-art { width: 100%; height: 152px; display: flex; justify-content: center; align-items: center; padding: 8px 12px; margin: 12px 0 0; border-radius: 17px; background: #fff; overflow: hidden; }
 .custom-image { display: block; width: 100%; height: 100%; object-fit: contain; }
 .no-image { display: flex; flex-direction: column; align-items: center; gap: 10px; color: #8e8e93; font-size: 13px; }
 .no-image svg { width: 34px; height: 34px; }
-.exercise-prescription { border-top: 1px solid var(--line); padding-top: 14px; display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.exercise-prescription { border-bottom: 1px solid var(--line); padding: 12px 0; margin-top: 4px; display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
 .exercise-prescription strong { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .exercise-prescription strong>span { color: var(--secondary); font-weight: 400; margin: 0 3px; }
 .exercise-prescription>span { font-size: 13px; color: var(--secondary); }
@@ -201,7 +201,7 @@ dialog::backdrop { background: rgba(0,0,0,.25); backdrop-filter: blur(5px); -web
   .section-heading h2 { font-size: 22px; }
   .exercise-list { grid-template-columns: 1fr; gap: 16px; }
   .exercise-card { padding: 19px 20px; border-radius: 26px; }
-  .exercise-art { height: 154px; margin: 12px 0 14px; }
+  .exercise-art { height: 154px; margin: 12px 0 0; }
   .exercise-prescription { padding-top: 13px; }
   .exercise-prescription>span { font-size: 13px; }
   .profile-grid { grid-template-columns: 1fr; gap: 18px; }
