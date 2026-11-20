@@ -1,6 +1,15 @@
 # 循练 · 我的健身计划
 
-[打开训练计划](https://done1314.github.io/xunlian-fitness/)
+源码当前保持私有。当前 GitHub 套餐不支持私有仓库的 Pages，因此尚未上线。
+
+以后公开并发布：
+
+1. 仓库 Settings → General → Danger Zone → Change repository visibility，改为 Public。
+2. Settings → Pages → Build and deployment，选择 Deploy from a branch。
+3. Branch 选择 main，目录选择 / (root)，点击 Save。
+4. 等待 GitHub 完成发布，页面会显示可访问的网址。预期地址为 https://done1314.github.io/xunlian-fitness/ 。
+
+也可以保持仓库私有，并在支持私有仓库 Pages 的 GitHub 套餐下启用发布。
 
 每天查看训练动作、组数、次数与动作图。底部“今日训练”和“我的”两个入口，支持圆润的玻璃按钮与浅色/深色外观。
 
@@ -13,4 +22,4 @@
 
 训练内容及 20 张图解来自提供的《三分化图解训练计划.pdf》。交互参考 [study-guardian-webapp](https://github.com/done1314/study-guardian-webapp)。
 
-这是无构建的静态 Web App，由 GitHub Pages 从 main 分支根目录发布。可使用任意静态服务器在本地预览。记录保存在当前浏览器，不同设备不自动同步。详细使用方法见[使用说明](使用说明.md)。
+这是无构建的静态 Web App，可使用 GitHub Pages 从 main 分支根目录发布，也可使用任意静态服务器在本地预览。计划保存在当前浏览器，不同设备不自动同步。详细使用方法见[使用说明](使用说明.md)。
