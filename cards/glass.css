@@ -1,0 +1,26 @@
+/* Clear functional surfaces; optical displacement is supplied by glass-ui.js. */
+.glass{background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.62);backdrop-filter:blur(12px) saturate(1.5);-webkit-backdrop-filter:blur(12px) saturate(1.5);box-shadow:0 7px 22px #17192b0c,inset 0 1px 1px #ffffffed,inset 0 -1px 1px #4a4e6622,1px 0 1px #ffffff70,-1px 0 1px #ffffff50}
+.glass:not(.bottom-nav){position:relative;isolation:isolate;transition:transform 150ms cubic-bezier(.2,.7,.2,1),background-color 150ms ease-out}
+.glass:not(.bottom-nav)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 1px 1px 1px #ffffffe6,inset -1px -1px 1px #9195a819;opacity:.9}
+.glass:not(.bottom-nav):active{transform:scale(.975);background:rgba(255,255,255,.42);filter:none}
+.bottom-nav{overflow:visible;background:rgba(247,248,252,.28);border-color:#ffffffa8;box-shadow:0 8px 30px #26243b16,inset 0 1px 1px #fffffff2,inset 0 -1px 1px #777d921f,0 0 0 .5px #c2c5d222;touch-action:pan-y}
+.bottom-nav::after{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:inherit;box-shadow:inset 1px 1px 1px #ffffffe6,inset -1px -1px 1px #ffffff80}
+.bottom-nav button{color:#686971;font-size:11px;font-weight:550;z-index:2}
+.bottom-nav button[aria-current="page"]{color:#007aff}
+.bottom-nav button:active{filter:none}
+.nav-selection{z-index:1;background:#e7e9ef35;box-shadow:inset 0 1px 1px #fff9,inset 0 -1px 1px #979fb52b,0 2px 6px #3945630b;transition:none;pointer-events:none}
+.nav-lens-copy{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);padding:5px;z-index:3;pointer-events:none;background:rgba(229,234,244,.62);border-radius:inherit;color:#007aff;clip-path:inset(0 100% 0 0)}
+.nav-copy-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:600;border-radius:99px}
+.nav-copy-item svg{display:block;width:24px;height:24px}
+.nav-scene{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:0;background:#f2f2f7;opacity:.35}
+.nav-scene *{pointer-events:none!important;transition:none!important;animation:none!important}
+.nav-shade{height:94px;background:linear-gradient(transparent,#f2f2f766 90%)}
+.bottom-nav.has-scene{background:rgba(247,248,252,.2)}
+.bottom-nav.is-pressed .nav-selection{box-shadow:inset 0 1px 2px #fff,inset 0 -1px 1px #96a4c238,0 2px 8px #3945630f}
+.deck-controls button{background:rgba(255,255,255,.44);box-shadow:inset 0 1px 1px #fff9,inset 0 -1px 1px #8b90a019;border:1px solid #ffffff80}
+.task-card{box-shadow:0 10px 35px #26243b09}
+.glass-solid .glass{background:#fff;border:1px solid #c9cbd3;backdrop-filter:none;-webkit-backdrop-filter:none}
+.glass-solid .nav-lens-copy,.glass-solid .nav-scene{display:none}
+.glass-solid .nav-selection{background:#e5e5eb;box-shadow:none}
+.glass-solid .nav-shade{display:none}
+@media(prefers-reduced-motion:reduce){.glass:not(.bottom-nav){transition:none}.glass:not(.bottom-nav):active{transform:none}}

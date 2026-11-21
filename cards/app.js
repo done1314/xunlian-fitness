@@ -40,7 +40,9 @@
     document.body.dataset.view=view;
     document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
     document.querySelectorAll('[data-nav]').forEach(el=>{if(el.dataset.nav===view)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
-    $('.nav-selection').style.transform=`translateX(${['today','plan','profile'].indexOf(view)*100}%)`;
+    const navIndex=['today','plan','profile'].indexOf(view);
+    if(window.XunlianGlass)window.XunlianGlass.select(navIndex);
+    else $('.nav-selection').style.transform=`translateX(${navIndex*100}%)`;
     $('#app').innerHTML=view==='today'?renderToday():view==='plan'?renderPlan():renderProfile();
     if(view==='today'&&$('#active-card'))bindDeck();
     if(view==='plan')bindPlanSwipes();
