@@ -52,20 +52,15 @@
       existingSegments.querySelectorAll('[data-kind]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.kind===planKind)));
       if(focusedKind)existingSegments.querySelector(`[data-kind="${focusedKind}"]`)?.focus({preventScroll:true});
     }
-    if(view==='today'&&$('#active-card')){sizeTaskArt();bindDeck()}
+    if(view==='today'&&$('#active-card'))bindDeck();
     if(view==='plan')bindPlanSwipes();
     if(view==='profile')bindProfile();
     window.XunlianGlass?.refresh();
   }
   function renderTaskArt(e){
-    if(!/^assets\/(push|pull|legs)-\d+\.png$/.test(e.image))return `<div class="task-illustration"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}动作示意图" draggable="false"></div>`;
-    return `<div class="task-illustration dual-poses">${['start','end'].map((pose,i)=>`<div class="pose-stage"><div class="pose-crop ${pose}"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}${i?'结束':'起始'}动作" draggable="false"></div></div>`).join('')}</div>`;
-  }
-  function sizeTaskArt(){
-    document.querySelectorAll('.pose-crop img').forEach(img=>{
-      const fit=()=>{if(img.naturalWidth&&img.naturalHeight)img.parentElement.style.setProperty('--pose-ratio',img.naturalWidth*.44/img.naturalHeight)};
-      if(img.complete)fit();else img.addEventListener('load',fit,{once:true});
-    });
+    const shape=window.POSE_DATA?.[e.image];
+    if(!shape)return `<div class="task-illustration"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}动作示意图" draggable="false"></div>`;
+    return `<div class="task-illustration dual-poses poses-${shape.layout}">${shape.frames.map((frame,i)=>`<svg class="pose-view" viewBox="${frame.join(' ')}" role="img" aria-label="${esc(e.name)}${i?'结束':'起始'}动作" preserveAspectRatio="xMidYMid meet"><image href="${imageSrc(e.image)}" width="${shape.width}" height="${shape.height}"/></svg>`).join('')}</div>`;
   }
   function renderToday(){
     const day=Schedule.getDay(state,selectedDate),isRest=day.kind==='rest',before=day.kind==='before',kind=kinds[day.kind],exercises=state.plans[day.kind]||[];

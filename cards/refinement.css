@@ -11,6 +11,8 @@ body[data-view="today"] #app{padding-left:15px;padding-right:15px}
 .task-type svg{width:16px;height:16px}
 .task-illustration{padding:8px 8px 0}
 .task-illustration.dual-poses{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:4px;min-height:220px;padding:7px 10px}
+.task-illustration.poses-row{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:7px 19px}
+.task-illustration .pose-view{display:block;width:100%;height:100%;min-height:0;fill:initial;stroke:none;stroke-width:0;overflow:hidden}
 .pose-stage{display:flex;justify-content:center;align-items:center;min-height:0;height:100%;overflow:hidden}
 .pose-crop{height:100%;aspect-ratio:var(--pose-ratio,1.48);max-width:100%;overflow:hidden;position:relative}
 .pose-crop img{display:block;position:absolute;left:0;top:0;height:100%;width:auto;max-width:none;object-fit:fill}
