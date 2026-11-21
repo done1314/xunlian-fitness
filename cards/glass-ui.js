@@ -42,10 +42,20 @@ function cloneCard(source){
   node.querySelectorAll('[data-action],[data-nav],[data-edit],[data-kind]').forEach(el=>{
     ['data-action','data-nav','data-edit','data-kind'].forEach(attr=>el.removeAttribute(attr));
   });
-  node.querySelectorAll('button,input,select,textarea,a').forEach(el=>{el.tabIndex=-1;el.setAttribute('aria-hidden','true')});
   node.querySelectorAll('img').forEach(el=>{el.loading='eager';el.draggable=false});
   const originals=source.querySelectorAll('input,select,textarea');
-  node.querySelectorAll('input,select,textarea').forEach((el,i)=>{el.value=originals[i].value;if('checked'in el)el.checked=originals[i].checked});
+  node.querySelectorAll('input,select,textarea').forEach((el,i)=>{
+    const span=document.createElement('span'),original=originals[i];
+    if(['radio','checkbox'].includes(original.type)){span.hidden=true}
+    else{span.textContent=original.value||original.placeholder||'';Object.assign(span.style,{flex:'1',minWidth:'0',textAlign:'right',fontSize:'15px'})}
+    el.replaceWith(span);
+  });
+  node.querySelectorAll('label[for]').forEach(el=>el.removeAttribute('for'));
+  node.querySelectorAll('button,a').forEach(el=>{
+    const span=document.createElement('span');span.className=el.className;span.innerHTML=el.innerHTML;
+    if(el.getAttribute('style'))span.setAttribute('style',el.getAttribute('style'));
+    el.replaceWith(span);
+  });
   Object.assign(node.style,{position:'absolute',margin:'0',transform:'none',pointerEvents:'none'});
   return node;
 }
@@ -80,7 +90,31 @@ function paint(x){
 const spring=createSpring(selected*metrics().step,paint,{stiffness:520,damping:40});
 function move(index,immediate=false){spring.set(index*metrics().step,{immediate});if(immediate)paint(index*metrics().step)}
 function setSelected(index,{immediate=false}={}){selected=clamp(index,0,2);if(!drag)move(selected,immediate);scheduleScene(true)}
-window.XunlianGlass={select:setSelected};
+let segment=null;
+function refreshSegments(){
+  if(opaque.matches){segment?.destroy();segment=null;return}
+  const host=app.querySelector('.segmented');
+  if(segment?.host===host){segment.update();return}
+  segment?.destroy();segment=null;
+  if(!host||opaque.matches)return;
+  const choices=[...host.querySelectorAll('[data-kind]')];
+  const lensCopy=document.createElement('div');lensCopy.className='segment-lens-copy';lensCopy.setAttribute('aria-hidden','true');lensCopy.inert=true;
+  choices.forEach(button=>{const span=document.createElement('span');span.textContent=button.textContent;lensCopy.append(span)});
+  const shadow=document.createElement('span');shadow.className='segment-lens-shadow';shadow.setAttribute('aria-hidden','true');
+  host.append(shadow,lensCopy);
+  const optics=createGlass(lensCopy,{clip:true,refraction:5,bezel:.58,curvature:3,chroma:0,specular:.4,specularWidth:1.2,mapScale:1});
+  const step=()=>((host.clientWidth-8)/3);
+  const index=()=>Math.max(0,choices.findIndex(button=>button.getAttribute('aria-selected')==='true'));
+  const draw=x=>{const width=step(),height=host.clientHeight-8;shadow.style.width=width+'px';shadow.style.height=height+'px';shadow.style.transform=`translateX(${x}px)`;optics.update({x:x+4,y:4,width,height,radius:height/2})};
+  const slider=createSpring(index()*step(),draw,{stiffness:520,damping:40});
+  const update=()=>slider.set(index()*step(),{immediate:choices.some(button=>button.matches(':focus-visible'))});
+  const onClick=event=>{const button=event.target.closest('[data-kind]');if(button)slider.set(choices.indexOf(button)*step(),{immediate:button.matches(':focus-visible')})};
+  host.addEventListener('click',onClick);
+  const sizing=new ResizeObserver(()=>slider.set(index()*step(),{immediate:true}));sizing.observe(host);
+  slider.set(index()*step(),{immediate:true});
+  segment={host,update,destroy(){optics.destroy();slider.stop();sizing.disconnect();host.removeEventListener('click',onClick);lensCopy.remove();shadow.remove()}};
+}
+window.XunlianGlass={select:setSelected,refresh:refreshSegments};
 
 function configure(){
   copyGlass?.destroy();sceneGlass?.destroy();copyGlass=sceneGlass=null;
@@ -89,7 +123,7 @@ function configure(){
     copyGlass=createGlass(copy,{clip:true,refraction:6,bezel:.58,curvature:3,chroma:0,specular:.42,specularWidth:1.2,mapScale:1});
     sceneGlass=createGlass(scene,{fit:true,clip:true,radius:35,refraction:8,bezel:.7,curvature:4,chroma:0,blur:6,specular:.2,mapScale:1});
   }
-  move(selected,true);scheduleScene(true);
+  move(selected,true);scheduleScene(true);refreshSegments();
 }
 opaque.addEventListener('change',configure);
 
