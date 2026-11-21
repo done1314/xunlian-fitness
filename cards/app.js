@@ -15,6 +15,7 @@
     settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     dumbbell:'<g transform="rotate(-40 12 12)"><rect x="4" y="6" width="3" height="12" rx="1.2"/><rect x="17" y="6" width="3" height="12" rx="1.2"/><path d="M7 12h10M2 10v4M22 10v4M9 9v6M15 9v6"/></g>',
     camera:'<path d="M8 6l2-3h4l2 3h4a2 2 0 0 1 2 2v11H2V8a2 2 0 0 1 2-2Z"/><circle cx="12" cy="12" r="4"/>',
+    expand:'<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>',
     flame:'<path d="M12 2c2 5 7 8 7 13a7 7 0 0 1-14 0c0-3 2-6 4-8 0 4 2 5 3 5 2-2 2-5 0-10Z"/>',
     heart:'<path d="M20 5c-3-3-6-1-8 1-2-2-5-4-8-1s-1 7 8 15C21 12 23 8 20 5Z"/>',
     target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'
@@ -56,15 +57,22 @@
     if(view==='plan')bindPlanSwipes();
     if(view==='profile')bindProfile();
     window.XunlianGlass?.refresh();
+    fitTrainingCard();
   }
   function renderTaskArt(e){
-    const shape=window.POSE_DATA?.[e.image];
-    if(!shape)return `<div class="task-illustration"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}动作示意图" draggable="false"></div>`;
-    return `<div class="task-illustration dual-poses poses-${shape.layout}">${shape.frames.map((frame,i)=>{
-      const clip=`pose-${String(e.id).replace(/[^a-zA-Z0-9_-]/g,'')}-${i}`;
-      return `<svg class="pose-view" viewBox="${frame.join(' ')}" role="img" aria-label="${esc(e.name)}${i?'结束':'起始'}动作" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="${clip}" clipPathUnits="userSpaceOnUse"><rect x="${frame[0]}" y="${frame[1]}" width="${frame[2]}" height="${frame[3]}"/></clipPath></defs><image href="${imageSrc(e.image)}" width="${shape.width}" height="${shape.height}" clip-path="url(#${clip})"/></svg>`;
-    }).join('')}</div>`;
+    return `<div class="task-illustration" role="button" tabindex="0" aria-label="查看${esc(e.name)}完整动作图"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}完整动作示意图" draggable="false"><span class="image-expand" aria-hidden="true">${icon('expand')}</span></div>`;
   }
+  function fitTrainingCard(){
+    const deck=$('.today-shell .deck'),card=$('#active-card');if(!deck||!card)return;
+    const top=deck.getBoundingClientRect().top+window.scrollY;
+    const available=$('.bottom-nav').getBoundingClientRect().top-top-24;
+    const fixedHeight=['.task-top','.task-copy','.deck-controls'].reduce((sum,selector)=>sum+card.querySelector(selector).getBoundingClientRect().height,0);
+    const height=Math.max(Math.ceil(fixedHeight+116),Math.min(680,Math.floor(available)));
+    deck.style.setProperty('--training-card-height',`${height}px`);
+  }
+  let fitFrame=0;
+  function scheduleCardFit(){if(fitFrame)return;fitFrame=requestAnimationFrame(()=>{fitFrame=0;fitTrainingCard()})}
+  function showFullImage(e){showModal(e.name,`<div class="image-viewer"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}完整动作示意图"></div>`)}
   function renderToday(){
     const day=Schedule.getDay(state,selectedDate),isRest=day.kind==='rest',before=day.kind==='before',kind=kinds[day.kind],exercises=state.plans[day.kind]||[];
     cardIndex=Math.min(Math.max(cardIndex,0),Math.max(0,exercises.length-1));
@@ -144,15 +152,15 @@
     const paint=()=>{el.style.transform=`translateX(${x}px)${rotate?` rotate(${x/45}deg)`:''}`};
     function tick(time){if(disposed)return;const dt=Math.min((time-lastTime)/1000||.016,.032);lastTime=time;const force=(target-x)*390-v*37;v+=force*dt;x+=v*dt;paint();if(Math.abs(target-x)>.3||Math.abs(v)>2)frame=requestAnimationFrame(tick);else{x=target;v=0;paint();frame=0}}
     function settle(to,velocity=0){target=to;v=velocity;if(reduced){x=to;paint();return}cancelAnimationFrame(frame);lastTime=performance.now();frame=requestAnimationFrame(tick)}
-    const down=e=>{if(e.button!==0||e.target.closest('button,input,select,textarea'))return;cancelAnimationFrame(frame);drag={pointer:e.pointerId,start:e.clientX,startY:e.clientY,base:x,last:e.clientX,time:performance.now(),velocity:0,intent:null,moved:false};el.setPointerCapture(e.pointerId)};
+    const down=e=>{if(e.button!==0||e.target.closest('button,input,select,textarea'))return;cancelAnimationFrame(frame);drag={pointer:e.pointerId,origin:e.target,start:e.clientX,startY:e.clientY,base:x,last:e.clientX,time:performance.now(),velocity:0,intent:null,moved:false};el.setPointerCapture(e.pointerId)};
     const move=e=>{if(!drag||e.pointerId!==drag.pointer)return;const dx=e.clientX-drag.start,dy=e.clientY-drag.startY,time=performance.now();if(!drag.intent&&Math.max(Math.abs(dx),Math.abs(dy))>8)drag.intent=Math.abs(dx)>Math.abs(dy)*1.15?'x':'y';if(drag.intent!=='x')return;drag.moved=true;drag.velocity=(e.clientX-drag.last)/Math.max(time-drag.time,1)*1000;drag.last=e.clientX;drag.time=time;x=drag.base+dx;if(resist(x))x=x*.22;paint()};
-    const end=(e,cancelled=false)=>{if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);const velocity=performance.now()-d.time<100?d.velocity:0;if(!cancelled&&d.intent==='x')onRelease(x,velocity,settle);else{settle(0);if(!cancelled&&!d.moved&&d.intent!=='y')onClick()}};
+    const end=(e,cancelled=false)=>{if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);const velocity=performance.now()-d.time<100?d.velocity:0;if(!cancelled&&d.intent==='x')onRelease(x,velocity,settle);else{settle(0);if(!cancelled&&!d.moved&&d.intent!=='y')onClick(d.origin)}};
     const up=e=>end(e),cancel=e=>end(e,true);el.addEventListener('pointerdown',down);el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',cancel);
     paint();
     return {settle,dispose(){disposed=true;cancelAnimationFrame(frame);el.removeEventListener('pointerdown',down);el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',cancel)}}
   }
   let deckController=null;
-  function bindDeck(initial=0){const el=$('#active-card'),list=state.plans[Schedule.getDay(state,selectedDate).kind];deckController=swipeController(el,{initial,rotate:true,resist:x=>(cardIndex===0&&x>0)||(cardIndex===list.length-1&&x<0),onRelease(x,v,settle){const direction=FitnessModel.swipe(x,v,el.clientWidth,cardIndex,list.length);if(direction){cardIndex+=direction;render();deckController.dispose();bindDeck(matchMedia('(prefers-reduced-motion: reduce)').matches?0:direction*el.clientWidth*.65);deckController.settle(0,v*.15)}else settle(0,v)}});el.onkeydown=e=>{if(e.key==='ArrowLeft'){e.preventDefault();changeCard(1)}if(e.key==='ArrowRight'){e.preventDefault();changeCard(-1)}};gestureCleanup=()=>deckController?.dispose()}
+  function bindDeck(initial=0){const el=$('#active-card'),list=state.plans[Schedule.getDay(state,selectedDate).kind];deckController=swipeController(el,{initial,rotate:true,resist:x=>(cardIndex===0&&x>0)||(cardIndex===list.length-1&&x<0),onClick:target=>{if(target?.closest('.task-illustration'))showFullImage(list[cardIndex])},onRelease(x,v,settle){const direction=FitnessModel.swipe(x,v,el.clientWidth,cardIndex,list.length);if(direction){cardIndex+=direction;render();deckController.dispose();bindDeck(matchMedia('(prefers-reduced-motion: reduce)').matches?0:direction*el.clientWidth*.65);deckController.settle(0,v*.15)}else settle(0,v)}});el.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('.task-illustration')){e.preventDefault();showFullImage(list[cardIndex])}if(e.key==='ArrowLeft'){e.preventDefault();changeCard(1)}if(e.key==='ArrowRight'){e.preventDefault();changeCard(-1)}};gestureCleanup=()=>deckController?.dispose()}
   function changeCard(direction){const kind=Schedule.getDay(state,selectedDate).kind,list=state.plans[kind]||[];const next=cardIndex+direction;if(next<0||next>=list.length)return;cardIndex=next;render()}
   function bindPlanSwipes(){const controllers=[];document.querySelectorAll('.plan-wrap').forEach(wrap=>{const el=wrap.querySelector('.plan-card'),id=wrap.dataset.planId;controllers.push(swipeController(el,{resist:x=>x<0,onRelease(x,v,settle){if(x+v*.14>el.clientWidth*.35)deleteExercise(planKind,id);else settle(0,v)}}))});gestureCleanup=()=>controllers.forEach(c=>c.dispose())}
   function navigate(next){view=next;if(next==='today')selectedDate=today();location.hash=next;render();window.scrollTo({top:0,behavior:'instant'})}
@@ -162,6 +170,9 @@
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&view==='today'&&selectedDate!==today()){selectedDate=today();cardIndex=0;render()}});
   save(); // Persist the first start date so reopening tomorrow continues the cycle.
   render();
+  window.addEventListener('resize',scheduleCardFit,{passive:true});
+  window.visualViewport?.addEventListener('resize',scheduleCardFit,{passive:true});
+  document.fonts.ready.then(scheduleCardFit);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 })();
 

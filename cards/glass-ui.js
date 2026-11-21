@@ -38,7 +38,10 @@ let clones=new Map();
 function cloneCard(source){
   const node=source.cloneNode(true);
   node.removeAttribute('id');
+  node.removeAttribute('tabindex');
+  node.removeAttribute('role');
   node.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+  node.querySelectorAll('[tabindex],[role]').forEach(el=>{el.removeAttribute('tabindex');el.removeAttribute('role')});
   node.querySelectorAll('[data-action],[data-nav],[data-edit],[data-kind]').forEach(el=>{
     ['data-action','data-nav','data-edit','data-kind'].forEach(attr=>el.removeAttribute(attr));
   });
