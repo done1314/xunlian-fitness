@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="循练卡片">
+  <meta name="description" content="把今天的训练，放在一张卡片里。推、拉、蹲三分化训练计划。">
+  <title>循练 · 卡片版</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="style.css?v=1.0.0">
+</head>
+<body>
+  <main id="app"></main>
+  <div class="nav-shade" aria-hidden="true"></div>
+  <nav class="bottom-nav glass" aria-label="主导航">
+    <span class="nav-selection" aria-hidden="true"></span>
+    <button data-nav="today"><span data-icon="cards"></span><span>今日训练</span></button>
+    <button data-nav="plan"><span data-icon="plan"></span><span>训练计划</span></button>
+    <button data-nav="profile"><span data-icon="person"></span><span>我的</span></button>
+  </nav>
+  <dialog id="modal" aria-labelledby="modal-title"><div id="modal-content"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="schedule.js"></script>
+  <script src="plan-data.js"></script>
+  <script src="model.js"></script>
+  <script src="app.js?v=1.0.0"></script>
+</body>
+</html>
