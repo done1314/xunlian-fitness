@@ -60,7 +60,10 @@
   function renderTaskArt(e){
     const shape=window.POSE_DATA?.[e.image];
     if(!shape)return `<div class="task-illustration"><img src="${imageSrc(e.image)}" alt="${esc(e.name)}动作示意图" draggable="false"></div>`;
-    return `<div class="task-illustration dual-poses poses-${shape.layout}">${shape.frames.map((frame,i)=>`<svg class="pose-view" viewBox="${frame.join(' ')}" role="img" aria-label="${esc(e.name)}${i?'结束':'起始'}动作" preserveAspectRatio="xMidYMid meet"><image href="${imageSrc(e.image)}" width="${shape.width}" height="${shape.height}"/></svg>`).join('')}</div>`;
+    return `<div class="task-illustration dual-poses poses-${shape.layout}">${shape.frames.map((frame,i)=>{
+      const clip=`pose-${String(e.id).replace(/[^a-zA-Z0-9_-]/g,'')}-${i}`;
+      return `<svg class="pose-view" viewBox="${frame.join(' ')}" role="img" aria-label="${esc(e.name)}${i?'结束':'起始'}动作" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="${clip}" clipPathUnits="userSpaceOnUse"><rect x="${frame[0]}" y="${frame[1]}" width="${frame[2]}" height="${frame[3]}"/></clipPath></defs><image href="${imageSrc(e.image)}" width="${shape.width}" height="${shape.height}" clip-path="url(#${clip})"/></svg>`;
+    }).join('')}</div>`;
   }
   function renderToday(){
     const day=Schedule.getDay(state,selectedDate),isRest=day.kind==='rest',before=day.kind==='before',kind=kinds[day.kind],exercises=state.plans[day.kind]||[];
