@@ -1,7 +1,7 @@
 // Optical engine: gentpan/liquidglass, MIT; see vendor/LIQUID-GLASS-LICENSE.txt.
 import {createGlass,createSpring} from './vendor/liquid-glass.js';
-import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js?v=1.3.1';
-import {createNavigationOptics} from './navigation-optics.js?v=1.3.1';
+import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js?v=1.3.2';
+import {createNavigationOptics} from './navigation-optics.js?v=1.3.2';
 
 const nav=document.querySelector('.bottom-nav'),app=document.querySelector('#app');
 const buttons=[...nav.querySelectorAll('[data-nav]')],selection=nav.querySelector('.nav-selection');
