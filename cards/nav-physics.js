@@ -24,50 +24,61 @@ export function integrateSpring(channel,target,seconds,stiffness=380,damping=25)
 
 export function createLensMotion(initial,onUpdate,{reducedMotion=()=>false,raf=requestAnimationFrame,caf=cancelAnimationFrame,now=()=>performance.now()}={}){
   const channel=value=>({value,velocity:0});
-  const state={x:channel(initial),y:channel(0),sx:channel(1),sy:channel(1)};
-  let target=initial,frame=0,last=0,held=false,tracking=false,pulseUntil=0,dragVelocity=0;
-  const render=moving=>onUpdate({x:state.x.value,y:state.y.value,scaleX:state.sx.value,scaleY:state.sy.value,moving,held,tracking});
+  const state={x:channel(initial),sx:channel(1),sy:channel(1)};
+  let target=initial,frame=0,last=0,held=false,tracking=false,pulseUntil=0,dragVelocity=0,travelling=false,arrival=false;
+  const render=moving=>onUpdate({x:state.x.value,y:0,scaleX:state.sx.value,scaleY:state.sy.value,moving,held,tracking,phase:tracking?'drag':travelling?'travel':'settle'});
   const close=(axis,to,tolerance=.03)=>Math.abs(axis.value-to)<tolerance&&Math.abs(axis.velocity)<tolerance*8;
+  function arrive(){
+    travelling=false;arrival=true;
+    // The stretched liquid recoils on arrival, then rebounds past its resting
+    // width. Height responds in the opposite phase instead of scaling uniformly.
+    state.sx.velocity=Math.min(state.sx.velocity,-2.4);
+  }
   function tick(time){
     frame=0;
     const dt=Math.min(.032,Math.max(.001,(time-last)/1000));last=time;
-    const reduced=reducedMotion(),pulse=time<pulseUntil;
-    const travel=Math.min(.17,Math.abs(tracking?dragVelocity:state.x.velocity)/5800);
-    const sx=reduced?1:(held||pulse?1.20:1)+travel;
-    const sy=reduced?1:(held||pulse?1.36:1)-travel*.24;
-    const y=held&&!tracking&&!reduced?-3:0;
-    if(!tracking){integrateSpring(state.x,target,dt);integrateSpring(state.y,y,dt,440,27);}
-    integrateSpring(state.sx,sx,dt,460,23);
-    integrateSpring(state.sy,sy,dt,420,22);
-    const moving=(!tracking&&(!close(state.x,target)||!close(state.y,y)))||!close(state.sx,sx,.0007)||!close(state.sy,sy,.0007)||pulse;
-    if(!moving&&!tracking){state.x.value=target;state.y.value=y;state.sx.value=sx;state.sy.value=sy;}
+    const reduced=reducedMotion(),pulse=time<pulseUntil,previous=target-state.x.value;
+    if(!tracking)integrateSpring(state.x,target,dt,420,22);
+    if(travelling&&(previous*(target-state.x.value)<=0||Math.abs(target-state.x.value)<1.5))arrive();
+    if(pulseUntil&& !pulse){pulseUntil=0;if(!held&&!travelling&&!arrival)arrive();}
+    const speed=Math.abs(tracking?dragVelocity:state.x.velocity);
+    const stretch=Math.min(.24,speed/4200);
+    const sx=reduced?1:travelling?1.20+stretch:held?1.12+stretch:pulse?1.20:1;
+    const sy=reduced?1:(held||travelling||pulse?1.08:1)-.40*(state.sx.value-1);
+    integrateSpring(state.sx,sx,dt,340,14);
+    integrateSpring(state.sy,sy,dt,460,20);
+    const moving=(!tracking&&!close(state.x,target))||!close(state.sx,sx,.0007)||!close(state.sy,sy,.0007)||pulse;
+    if(!moving&&!tracking){state.x.value=target;state.sx.value=1;state.sy.value=1;arrival=false;}
     render(moving);
     if(moving)frame=raf(tick);
   }
   function wake(){if(!frame){last=now();frame=raf(tick);}}
   function jump(next){
-    if(frame)caf(frame);frame=0;target=next;held=tracking=false;pulseUntil=0;
-    for(const [key,value]of Object.entries({x:next,y:0,sx:1,sy:1})){state[key].value=value;state[key].velocity=0;}
+    if(frame)caf(frame);frame=0;target=next;held=tracking=travelling=arrival=false;pulseUntil=0;
+    for(const [key,value]of Object.entries({x:next,sx:1,sy:1})){state[key].value=value;state[key].velocity=0;}
     render(false);
   }
   return {
     get value(){return state.x.value;},
-    get y(){return state.y.value;},
+    get y(){return 0;},
     get velocity(){return state.x.velocity;},
     get isHeld(){return held;},
     get isTracking(){return tracking;},
-    press(){held=true;pulseUntil=0;wake();},
-    track(x,y,velocity=0){
+    press(){held=tracking=true;travelling=arrival=false;dragVelocity=0;pulseUntil=0;wake();},
+    track(x,velocity=0){
       held=tracking=true;dragVelocity=velocity;
-      state.x.value=x;state.x.velocity=0;state.y.value=y;state.y.velocity=0;
+      state.x.value=x;state.x.velocity=0;
       // Position is written on this pointer event, without spring lag.
       render(true);wake();
     },
     goTo(next,{immediate=false,pulse=false,velocity}={}){
-      target=next;
       if(immediate||reducedMotion()){jump(next);return;}
+      if(next!==target||(!tracking&&pulse)){
+        travelling=Math.abs(next-state.x.value)>2;arrival=false;
+      }
+      target=next;
       if(Number.isFinite(velocity))state.x.velocity=clamp(velocity,-2400,2400);
-      if(pulse)pulseUntil=now()+105;
+      if(pulse&&!travelling)pulseUntil=now()+100;
       wake();
     },
     release(next,{velocity=0,pulse=true}={}){

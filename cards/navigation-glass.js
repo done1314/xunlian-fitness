@@ -1,6 +1,7 @@
 // Optical engine: gentpan/liquidglass, MIT; see vendor/LIQUID-GLASS-LICENSE.txt.
 import {createGlass,createSpring} from './vendor/liquid-glass.js';
-import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js';
+import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js?v=1.3.1';
+import {createNavigationOptics} from './navigation-optics.js?v=1.3.1';
 
 const nav=document.querySelector('.bottom-nav'),app=document.querySelector('#app');
 const buttons=[...nav.querySelectorAll('[data-nav]')],selection=nav.querySelector('.nav-selection');
@@ -15,27 +16,22 @@ let ignoreNativeClickUntil=0,sceneFrame=0,rebuildNext=false;
 // outside shell stretches with transform, so moving never regenerates a PNG map.
 const surface=document.createElement('span');surface.className='nav-lens-surface';
 const world=document.createElement('span');world.className='nav-lens-world';
-const track=document.createElement('span');track.className='nav-lens-icons';
-surface.append(world,track);selection.replaceChildren(surface);
+surface.append(world);selection.replaceChildren(surface);
 selection.setAttribute('aria-hidden','true');selection.inert=true;
-for(const button of buttons){
-  const copy=document.createElement('span');copy.className='nav-copy-item';
-  copy.innerHTML=button.innerHTML;
-  copy.querySelectorAll('[data-icon]').forEach(el=>el.removeAttribute('data-icon'));
-  track.append(copy);
-}
+const inkOptics=createNavigationOptics(nav.parentElement,nav,buttons);
 const scene=document.createElement('div');scene.className='nav-scene';scene.inert=true;
 scene.setAttribute('aria-hidden','true');nav.prepend(scene);
 
-function paint({x,y,scaleX,scaleY,moving,held,tracking}){
-  selection.style.transform=`translate3d(${x}px,${y}px,0) scale(${scaleX},${scaleY})`;
-  // Keep letters at a readable size while the shell inflates around the finger.
-  const magnification=opaque.matches?1:1.035;
-  const ax=magnification/scaleX,ay=magnification/scaleY;
+function paint(frame){
+  const {x,scaleX,scaleY,moving,held,tracking}=frame;
+  selection.style.transform=`translate3d(${x}px,0,0) scale(${scaleX},${scaleY})`;
+  // Background is counter-transformed; the independent SVG text plane never
+  // receives the moving shell's translation, scale or spring in the first place.
+  const ax=1/scaleX,ay=1/scaleY;
   const tx=geometry.step/2-(x+geometry.step/2)*ax;
   const ty=geometry.height/2*(1-ay);
-  const matrix=`matrix(${ax},0,0,${ay},${tx},${ty})`;
-  track.style.transform=matrix;world.style.transform=matrix;
+  world.style.transform=`matrix(${ax},0,0,${ay},${tx},${ty})`;
+  inkOptics.draw(frame);
   nav.classList.toggle('is-animating',moving);
   nav.classList.toggle('is-pressed',held);
   nav.classList.toggle('is-dragging',tracking);
@@ -99,8 +95,8 @@ function measure(){
   if(drag)cancelGesture();
   geometry={width,height,step};
   Object.assign(selection.style,{width:`${step}px`,height:`${height}px`});
-  Object.assign(track.style,{width:`${width-10}px`,height:`${height}px`});
   Object.assign(world.style,{width:`${width-10}px`,height:`${height}px`});
+  inkOptics.resize({width,height,step,inset:nav.clientLeft+5});
   optics?.update({radius:height/2});
   sceneOptics?.update({radius:nav.clientHeight/2});
   motion.jump(selected*step);scheduleScene(true);
@@ -139,6 +135,7 @@ window.XunlianGlass={select:setSelected,refresh:refreshSegments};
 function configure(){
   optics?.destroy();sceneOptics?.destroy();optics=sceneOptics=null;
   document.documentElement.classList.toggle('glass-solid',opaque.matches);
+  inkOptics.setSolid(opaque.matches);
   if(!opaque.matches){
     // The engine's RGB-sum fringe requires an opaque source; this lens is
     // translucent. A single displacement pass keeps it clear instead of grey.
@@ -164,22 +161,21 @@ nav.addEventListener('pointerdown',event=>{
   if(event.button!==0||event.isPrimary===false||drag||!button)return;
   const rect=nav.getBoundingClientRect(),center=rect.left+5+motion.value+geometry.step/2;
   const grabbed=Math.abs(event.clientX-center)<geometry.step*.64;
-  drag={id:event.pointerId,x:event.clientX,y:event.clientY,index:buttons.indexOf(button),rect,active:false,grabX:grabbed?event.clientX-center:0,baseY:motion.y,previousX:event.clientX,lastTime:performance.now(),velocity:0};
+  drag={id:event.pointerId,x:event.clientX,index:buttons.indexOf(button),rect,active:false,grabX:grabbed?event.clientX-center:0,previousX:event.clientX,lastTime:performance.now(),velocity:0};
   motion.press();nav.setPointerCapture(event.pointerId);
   // Pointer focus must not be mistaken for keyboard navigation or snap the lens.
   event.preventDefault();
 });
 nav.addEventListener('pointermove',event=>{
   if(!drag||event.pointerId!==drag.id)return;
-  const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
-  if(!drag.active&&Math.hypot(dx,dy)<4)return;
+  const dx=event.clientX-drag.x;
+  if(!drag.active&&Math.abs(dx)<4)return;
   drag.active=true;
   const time=performance.now(),dt=Math.max(.008,(time-drag.lastTime)/1000);
   const velocity=clamp((event.clientX-drag.previousX)/dt,-2400,2400);
   drag.velocity=drag.velocity*.3+velocity*.7;drag.previousX=event.clientX;drag.lastTime=time;
   const x=event.clientX-drag.rect.left-5-geometry.step/2-drag.grabX;
-  const y=rubberBand(drag.baseY+dy,-18,18,14);
-  motion.track(rubberBand(x,0,geometry.step*(buttons.length-1)),y,drag.velocity);
+  motion.track(rubberBand(x,0,geometry.step*(buttons.length-1)),drag.velocity);
   event.preventDefault();
 });
 nav.addEventListener('pointerup',event=>finish(event));

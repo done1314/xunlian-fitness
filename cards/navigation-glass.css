@@ -8,8 +8,9 @@
 .nav-selection::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;pointer-events:none;box-shadow:inset .9px 1.2px 1px #fffffff2,inset -.9px -1.2px 1px #7286a05c,0 0 0 .5px #b2bdd13d;background:linear-gradient(166deg,#fff3,transparent 25%,transparent 75%,#c5ddff38)}
 .nav-lens-surface{position:absolute;inset:0;overflow:hidden;border-radius:inherit;isolation:isolate;pointer-events:none;background:#f6f9ff24}
 .nav-lens-world{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;opacity:.46;filter:blur(2px)}
-.nav-lens-icons{position:absolute;left:0;top:0;display:grid;grid-template-columns:repeat(3,1fr);transform-origin:0 0;color:#007aff;pointer-events:none}
-.nav-lens-icons .nav-copy-item{font-size:11px;font-weight:600}
+.nav-optics{position:absolute;inset:0;z-index:21;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;fill:none;stroke:none}
+.nav-optics svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-optics text{stroke:none}
 .nav-dock .bottom-nav.is-pressed .nav-selection{box-shadow:0 10px 22px #2736532b,0 2px 4px #1b2b4a1c,inset 0 1px 1px #fff,inset 0 -1px 1px #5b6d8d50}
 .nav-dock .bottom-nav::after{z-index:1}
 .glass-solid .nav-dock .nav-selection{background:#e5e5eb;box-shadow:none}
