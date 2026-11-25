@@ -45,7 +45,7 @@
     const navIndex=['today','plan','profile'].indexOf(view);
     if(window.XunlianGlass)window.XunlianGlass.select(navIndex);
     else $('.nav-selection').style.transform=`translateX(${navIndex*100}%)`;
-    const existingSegments=view==='plan'?$('#app .segmented'):null;
+    const existingSegments=view==='plan'?($('#app .segment-shell')||$('#app .segmented')):null;
     const focusedKind=document.activeElement?.dataset.kind;
     $('#app').innerHTML=view==='today'?renderToday():view==='plan'?renderPlan():renderProfile();
     if(existingSegments&&$('#app .segmented')){

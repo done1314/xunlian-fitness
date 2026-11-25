@@ -7,7 +7,7 @@ export function rubberBand(value,low,high,limit=28){
 
 export function destinationIndex(position,velocity,step,count=3){
   // A short flick can cross a stop; a fast flick must not skip the entire bar.
-  const projected=position+clamp(velocity*.10,-step*.64,step*.64);
+  const projected=position+clamp(velocity*.10,-step*.35,step*.35);
   return clamp(Math.round(projected/step),0,count-1);
 }
 
