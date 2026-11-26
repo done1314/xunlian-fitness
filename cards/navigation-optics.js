@@ -1,4 +1,4 @@
-import {createLensRenderer} from './nav-gpu.js?v=1.3.4';
+import {createLensRenderer} from './nav-gpu.js?v=1.3.5';
 const NS='http://www.w3.org/2000/svg';
 const node=(tag,attrs={})=>{const el=document.createElementNS(NS,tag);for(const [name,value]of Object.entries(attrs))el.setAttribute(name,value);return el;};
 
@@ -20,7 +20,7 @@ export function createNavigationOptics(dock,nav,buttons){
   }
   function draw(frame){
     lastFrame=frame;
-    const active=frame.moving||frame.held||frame.tracking;
+    const active=frame.optical??(frame.phase!=='settle');
     canvas.hidden=!active||!gpu||lost;
     source.style.display=active&&(!gpu||lost)?'block':'none';
     if(active!==visible){visible=active;canvas.dataset.active=String(active);}

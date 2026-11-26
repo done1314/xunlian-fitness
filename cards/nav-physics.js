@@ -30,6 +30,9 @@ export function createLensMotion(initial,onUpdate,{reducedMotion=()=>false,raf=r
   const close=(axis,to,tolerance=.03)=>Math.abs(axis.value-to)<tolerance&&Math.abs(axis.velocity)<tolerance*8;
   function arrive(){
     travelling=false;arrival=true;
+    // Arrival is a firm selection point. Only the glass shape recoils; its
+    // centre and the selected ink no longer oscillate around the destination.
+    state.x.value=target;state.x.velocity=0;
     // The stretched liquid recoils on arrival, then rebounds past its resting
     // width. Height responds in the opposite phase instead of scaling uniformly.
     state.sx.velocity=Math.min(state.sx.velocity,-2.4);

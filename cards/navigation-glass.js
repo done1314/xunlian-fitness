@@ -1,4 +1,4 @@
-import {createGlassRail} from './nav-rail.js?v=1.3.4';
+import {createGlassRail} from './nav-rail.js?v=1.3.5';
 
 const opaque=matchMedia('(prefers-reduced-transparency: reduce), (prefers-contrast: more)');
 const setSurfacePreference=()=>document.documentElement.classList.toggle('glass-solid',opaque.matches);
