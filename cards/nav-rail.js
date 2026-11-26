@@ -1,5 +1,5 @@
-import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js?v=1.3.3';
-import {createNavigationOptics} from './navigation-optics.js?v=1.3.3';
+import {createLensMotion,rubberBand,destinationIndex} from './nav-physics.js?v=1.3.4';
+import {createNavigationOptics} from './navigation-optics.js?v=1.3.4';
 
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 export function createGlassRail(host,buttons,lens,{initial=0,dock=host.parentElement}={}){
@@ -10,6 +10,7 @@ export function createGlassRail(host,buttons,lens,{initial=0,dock=host.parentEle
   host.classList.add('glass-rail');lens.inert=true;
   const motion=createLensMotion(0,frame=>{
     lens.style.transform=`translate3d(${frame.x}px,0,0) scale(${frame.scaleX},${frame.scaleY})`;
+    host.classList.toggle('is-optical',frame.moving||frame.held||frame.tracking);
     optics.draw(frame);
     host.classList.toggle('is-animating',frame.moving);host.classList.toggle('is-pressed',frame.held);host.classList.toggle('is-dragging',frame.tracking);
   },{reducedMotion:()=>reduced.matches});

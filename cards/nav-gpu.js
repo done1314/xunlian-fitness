@@ -7,9 +7,15 @@ precision mediump float;
 uniform sampler2D u_ink;
 uniform vec2 u_size;
 uniform vec4 u_lens;
+uniform vec3 u_track;
+uniform float u_zoom;
 uniform float u_bend;
 varying vec2 v_uv;
-vec4 ink(vec2 p){return texture2D(u_ink,(p+32.0)/u_size);}
+vec4 ink(vec2 p){
+  float cell=clamp(floor((p.x-u_track.x)/u_track.y),0.0,2.0);
+  vec2 origin=vec2(u_track.x+(cell+0.5)*u_track.y,u_track.z);
+  return texture2D(u_ink,((p-origin)/u_zoom+origin+32.0)/u_size);
+}
 void main(){
   vec2 p=vec2(v_uv.x,1.0-v_uv.y)*u_size-32.0;
   vec2 local=p-u_lens.xy,halfSize=u_lens.zw;
@@ -21,7 +27,7 @@ void main(){
   if(coverage<=0.0)discard;
   vec2 normal=length(outside)>0.01?normalize(outside)*sign(local):
     (q.x>q.y?vec2(sign(local.x),0.0):vec2(0.0,sign(local.y)));
-  float rim=(1.0-smoothstep(0.0,12.0,max(0.0,-d)))*step(0.01,u_bend);
+  float rim=(1.0-smoothstep(0.0,12.0,max(0.0,-d)))*clamp(u_bend/7.5,0.0,1.0);
   vec2 ray=p-normal*(rim*rim*u_bend);
   vec4 centre=ink(ray);
   vec4 warm=ink(ray-normal*(rim*0.85));
@@ -55,24 +61,26 @@ export function createLensRenderer(canvas){
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
   gl.uniform1i(gl.getUniformLocation(program,'u_ink'),0);
   const sizeUniform=gl.getUniformLocation(program,'u_size'),lensUniform=gl.getUniformLocation(program,'u_lens'),bendUniform=gl.getUniformLocation(program,'u_bend');
+  const trackUniform=gl.getUniformLocation(program,'u_track'),zoomUniform=gl.getUniformLocation(program,'u_zoom');
   gl.uniform1f(bendUniform,7.5);gl.clearColor(0,0,0,0);
-  let width=0,height=0,dpr=1,ready=false;
+  let width=0,height=0,dpr=1,ready=false,solid=false;
   return {
     upload(image,size){
       ({width,height,dpr}=size);
       canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
       gl.viewport(0,0,canvas.width,canvas.height);gl.uniform2f(sizeUniform,width,height);
+      gl.uniform3f(trackUniform,size.inset||0,size.step||1,size.centreY||0);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);ready=true;
     },
-    draw(cx,cy,halfWidth,halfHeight){
+    draw(cx,cy,halfWidth,halfHeight,zoom=1,strength=1){
       if(!ready)return;
       gl.disable(gl.SCISSOR_TEST);gl.clear(gl.COLOR_BUFFER_BIT);
       const left=Math.max(0,Math.floor((cx-halfWidth+31)*dpr)),right=Math.min(canvas.width,Math.ceil((cx+halfWidth+33)*dpr));
       const top=Math.max(0,Math.floor((cy-halfHeight+31)*dpr)),bottom=Math.min(canvas.height,Math.ceil((cy+halfHeight+33)*dpr));
       gl.enable(gl.SCISSOR_TEST);gl.scissor(left,canvas.height-bottom,Math.max(0,right-left),Math.max(0,bottom-top));
-      gl.uniform4f(lensUniform,cx,cy,halfWidth,halfHeight);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      gl.uniform4f(lensUniform,cx,cy,halfWidth,halfHeight);gl.uniform1f(zoomUniform,zoom);gl.uniform1f(bendUniform,solid?0:7.5*strength);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     },
-    setSolid(value){gl.uniform1f(bendUniform,value?0:7.5);},
+    setSolid(value){solid=value;},
     destroy(){gl.deleteTexture(texture);gl.deleteBuffer(buffer);gl.deleteProgram(program);}
   };
 }

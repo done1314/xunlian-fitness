@@ -2,8 +2,10 @@
 .nav-dock{position:fixed;inset:auto 0 6px;z-index:20;width:min(calc(100% - 44px),390px);height:70px;margin-inline:auto;pointer-events:none;overflow:visible}
 .nav-dock .bottom-nav{position:absolute;inset:0;left:0;bottom:auto;width:100%;height:100%;margin:0;transform:none;overflow:visible;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
 .nav-dock .bottom-nav button{touch-action:none;color:#686971;z-index:2}
-.nav-dock .bottom-nav button[aria-current="page"]{color:#686971}
+.nav-dock .bottom-nav button[aria-current="page"]{color:#007aff}
+.nav-dock .bottom-nav.is-optical button[aria-current="page"]{color:#686971}
 .glass-rail .nav-selection{position:absolute;left:5px;top:5px;z-index:3;border-radius:999px;pointer-events:none;transform-origin:50% 50%;background:transparent;transition:none;box-shadow:0 6px 16px #27365320,0 1px 3px #1b2b4a15,inset 0 1px 1px #fffffffa,inset 0 -1px 1px #5b6d8d44;will-change:transform}
+.glass-rail:not(.is-optical) .nav-selection{z-index:1}
 .nav-selection::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(155deg,#ffffff7d,#ffffff28 44%,#e3ecff2e 77%,#ffffff80);backdrop-filter:blur(4px) saturate(1.75);-webkit-backdrop-filter:blur(4px) saturate(1.75);box-shadow:inset 0 0 0 .75px #ffffffb8}
 .nav-selection::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;pointer-events:none;box-shadow:inset .9px 1.2px 1px #fffffff2,inset -.9px -1.2px 1px #7286a05c,0 0 0 .5px #b2bdd13d;background:linear-gradient(166deg,#fff3,transparent 25%,transparent 75%,#c5ddff38)}
 .nav-lens-surface{position:absolute;inset:0;overflow:hidden;border-radius:inherit;isolation:isolate;pointer-events:none;background:#f6f9ff24}
@@ -15,6 +17,7 @@
 .segment-shell{position:relative;isolation:isolate;margin-bottom:23px}
 .segment-shell .segmented{margin-bottom:0;overflow:visible;touch-action:none}
 .segment-shell .segmented.glass [data-kind]{color:#72747d;touch-action:none;user-select:none;-webkit-user-select:none}
+.segment-shell .segmented.glass:not(.is-optical) [data-kind][aria-selected="true"]{color:#007aff}
 .segment-shell .segmented .segment-selection{left:4px;top:4px}
 .segment-shell .nav-optics,.segment-shell .nav-optics-source{z-index:4}
 .nav-dock .bottom-nav.is-pressed .nav-selection{box-shadow:0 10px 22px #2736532b,0 2px 4px #1b2b4a1c,inset 0 1px 1px #fff,inset 0 -1px 1px #5b6d8d50}
